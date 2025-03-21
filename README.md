@@ -1,4 +1,4 @@
-# Kaisar Player - Face-Based Music Player
+# KaisarsPlayer - Face-Based Music Player
 
 A modern music player that uses facial emotion recognition to recommend songs based on your mood.
 
