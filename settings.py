@@ -292,13 +292,23 @@ class SettingsWindow(ctk.CTkToplevel):
         ctk.set_appearance_mode(theme)
         
     def change_language(self, language):
-        """Change application language."""
+        """Change application language and restart the application."""
         self.settings_manager.set_language(language)
         self.language_manager.set_language(language)
+        
+        # Show message about restart
         messagebox.showinfo(
             self.language_manager.get_text("restart_required"),
             self.language_manager.get_text("restart_message")
         )
+        
+        # Get the root window
+        root = self.master
+        while root.master is not None:
+            root = root.master
+        
+        # Schedule application restart
+        root.after(500, self._restart_application)
         
     def check_camera_permission(self):
         """Check camera permission and show result."""
@@ -311,4 +321,42 @@ class SettingsWindow(ctk.CTkToplevel):
             messagebox.showerror(
                 self.language_manager.get_text("camera_access"),
                 self.language_manager.get_text("camera_disabled")
+            )
+            
+    def _restart_application(self):
+        """Restart the application to apply language changes."""
+        try:
+            # Get the root window
+            root = self.master
+            while root.master is not None:
+                root = root.master
+                
+            # Close the settings window
+            self.destroy()
+            
+            # Close the main application
+            root.destroy()
+            
+            # Restart the application
+            import sys
+            import os
+            import subprocess
+            
+            # Get the current executable path
+            if getattr(sys, 'frozen', False):
+                # Running as compiled exe
+                application_path = sys.executable
+                subprocess.Popen([application_path])
+            else:
+                # Running in development environment
+                application_path = os.path.abspath(__file__)
+                script_dir = os.path.dirname(application_path)
+                main_script = os.path.join(script_dir, "main.py")
+                subprocess.Popen([sys.executable, main_script])
+                
+        except Exception as e:
+            print(f"Error restarting application: {e}")
+            messagebox.showerror(
+                "Error",
+                f"Failed to restart application: {e}"
             )

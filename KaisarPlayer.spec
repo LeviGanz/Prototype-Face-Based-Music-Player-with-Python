@@ -1,11 +1,9 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 import os
-import mediapipe
 from PyInstaller.utils.hooks import collect_data_files, collect_submodules
 
 block_cipher = None
-mediapipe_path = os.path.dirname(mediapipe.__file__)
 
 a = Analysis(
     ['main.py'],
@@ -14,15 +12,9 @@ a = Analysis(
     datas=[
         ('icons', 'icons'),
         ('languages', 'languages'),
-        (mediapipe_path, 'mediapipe')
-    ] + collect_data_files('mediapipe'),
+        ('Data/Emotion_Data', 'Data/Emotion_Data')
+    ],
     hiddenimports=[
-        'mediapipe',
-        'mediapipe.python',
-        'mediapipe.python.solutions',
-        'mediapipe.python.solutions.face_mesh',
-        'mediapipe.python.solutions.drawing_utils',
-        'mediapipe.python.solutions.drawing_styles',
         'camera_manager',
         'ui',
         'player',

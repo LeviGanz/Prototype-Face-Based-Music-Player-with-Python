@@ -11,9 +11,10 @@ def check_and_install_dependencies():
         'customtkinter': '>=5.2.1',
         'pygame': '>=2.5.2',
         'pillow': '>=10.1.0',
-        'mediapipe': '>=0.10.8',
         'opencv-python': '>=4.8.1',
-        'mutagen': '>=1.47.0'
+        'mutagen': '>=1.47.0',
+        'numpy': '>=1.24.0',
+        'tk': '>=0.1.0'
     }
     
     print("Checking dependencies...")
@@ -54,6 +55,24 @@ def build_launcher():
             '--clean',
             '--log-level=WARN'
         ])
+        
+        # Ensure Emotion_Data folder is copied to the dist directory
+        emotion_data_src = os.path.join('Data', 'Emotion_Data')
+        emotion_data_dst = os.path.join('dist', 'Data', 'Emotion_Data')
+        
+        # Create destination directory if it doesn't exist
+        os.makedirs(os.path.dirname(emotion_data_dst), exist_ok=True)
+        
+        # Copy the directory if it exists
+        if os.path.exists(emotion_data_src):
+            print(f"Copying Emotion_Data folder to {emotion_data_dst}...")
+            if os.path.exists(emotion_data_dst):
+                shutil.rmtree(emotion_data_dst)
+            shutil.copytree(emotion_data_src, emotion_data_dst)
+            print("Emotion_Data folder copied successfully")
+        else:
+            print(f"Warning: Emotion_Data folder not found at {emotion_data_src}")
+            
         return True
     except Exception as e:
         print(f"Build error: {e}")

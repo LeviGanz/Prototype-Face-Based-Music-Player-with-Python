@@ -612,37 +612,32 @@ class PlayerUI:
         self.player.set_volume(volume)
 
     def _open_camera(self):
-        """Open camera window for emotion detection"""
+        """Open camera for emotion detection"""
         try:
-            # Ensure any existing camera manager is cleaned up
-            if self.camera_manager is not None:
-                try:
-                    self.camera_manager.destroy()
-                except:
-                    pass
-                self.camera_manager = None
-            
-            # Initialize camera manager with root window and UI instance
+            from camera_manager import CameraManager
             self.camera_manager = CameraManager(
-                root_window=self.root,
-                parent_ui=self,
-                playlist_manager=self.playlist_manager,
-                language_manager=self.language_manager
+                self.root,
+                self,
+                self.playlist_manager,
+                self.language_manager
             )
-            
-            # Ensure the camera window is on top
-            self.camera_manager.lift()
-            self.camera_manager.focus_force()
-            
         except Exception as e:
-            print(f"Error opening camera: {str(e)}")
+            print(f"Error opening camera: {e}")
             messagebox.showerror("Error", str(e))
-            if self.camera_manager is not None:
-                try:
-                    self.camera_manager.destroy()
-                except:
-                    pass
-                self.camera_manager = None
+
+    def process_captured_frame(self, frame):
+        """Process captured frame from camera"""
+        try:
+            # Process frame with emotion manager
+            self.emotion_manager.process_frame(
+                frame,
+                self.root,
+                self.playlist_manager,
+                self.language_manager
+            )
+        except Exception as e:
+            print(f"Error processing captured frame: {e}")
+            messagebox.showerror("Error", str(e))
 
     def process_captured_image(self, image_path):
         """Process the captured image from camera"""

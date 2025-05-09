@@ -4,7 +4,6 @@ from PIL import Image, ImageTk
 import threading
 import time
 import os
-from datetime import datetime
 from tkinter import messagebox
 
 class CameraManager(ctk.CTkToplevel):
@@ -18,20 +17,13 @@ class CameraManager(ctk.CTkToplevel):
         self.playlist_manager = playlist_manager
         self.language_manager = language_manager
         
-        # Set temp directory path in Data folder using path_utils
-        from path_utils import get_temp_image_directory
-        self.temp_dir = get_temp_image_directory()
-        
         # Initialize variables
         self.cap = None
         self.is_running = False
         self.capture_timer = 3
-        self.current_image_path = None
+        self.current_frame = None
         self.camera_thread = None
         self.countdown_thread = None
-        
-        # Ensure temp directory exists
-        self._ensure_temp_directory()
         
         # Configure window
         self._setup_window()
@@ -39,17 +31,6 @@ class CameraManager(ctk.CTkToplevel):
         # Initialize camera
         self.initialize_camera()
         
-    def _ensure_temp_directory(self):
-        """Ensure temp directory exists"""
-        try:
-            if not os.path.exists(self.temp_dir):
-                os.makedirs(self.temp_dir)
-                print(f"Created temp directory at {self.temp_dir}")
-        except Exception as e:
-            print(f"Error creating temp directory: {e}")
-            messagebox.showerror("Error", f"Could not create temp directory: {e}")
-            self.destroy()
-            
     def _setup_window(self):
         """Setup window properties and UI elements"""
         try:
@@ -143,12 +124,15 @@ class CameraManager(ctk.CTkToplevel):
                 ret, frame = self.cap.read()
                 if not ret:
                     break
+                
+                # Store current frame for capture
+                self.current_frame = frame.copy()
                     
                 # Convert frame to RGB for display
-                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                display_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 
                 # Convert to PIL Image
-                image = Image.fromarray(frame)
+                image = Image.fromarray(display_frame)
                 
                 # Resize to fit window
                 image = image.resize((600, 400), Image.Resampling.LANCZOS)
@@ -187,48 +171,31 @@ class CameraManager(ctk.CTkToplevel):
             self.cleanup_camera()
             
     def capture_image(self):
-        """Capture and save image"""
+        """Capture frame and process it"""
         try:
-            if self.cap is None or not self.cap.isOpened():
-                raise Exception("Camera not initialized")
-                
-            # Capture frame
-            ret, frame = self.cap.read()
-            if not ret:
-                raise Exception("Could not capture image")
-                
-            # Use fixed filename 'Image1.jpg' as required
-            self.current_image_path = os.path.join(self.temp_dir, "Image1.jpg")
-            
-            # Ensure directory exists before saving
-            os.makedirs(os.path.dirname(self.current_image_path), exist_ok=True)
-            
-            # Save image
-            success = cv2.imwrite(self.current_image_path, frame)
-            if not success:
-                raise Exception(f"Failed to save image to: {self.current_image_path}")
-            print(f"Successfully saved image to: {self.current_image_path}")
+            if self.cap is None or not self.cap.isOpened() or self.current_frame is None:
+                raise Exception("Camera not initialized or no frame available")
             
             # Update UI
             self.timer_label.configure(text=self.language_manager.get_text("processing"))
             
-            # Process image after delay
-            self.after(3000, self.process_captured_image)
+            # Process captured frame after delay
+            self.after(1000, self.process_captured_frame)
             
         except Exception as e:
             print(f"Error capturing image: {e}")
             messagebox.showerror("Error", str(e))
             self.cleanup_camera()
             
-    def process_captured_image(self):
-        """Process captured image and cleanup"""
+    def process_captured_frame(self):
+        """Process captured frame and cleanup"""
         try:
-            if self.current_image_path and os.path.exists(self.current_image_path):
-                # Process image
-                self.parent_ui.process_captured_image(self.current_image_path)
+            if self.current_frame is not None:
+                # Process frame directly
+                self.parent_ui.process_captured_frame(self.current_frame)
             
         except Exception as e:
-            print(f"Error processing image: {e}")
+            print(f"Error processing frame: {e}")
             messagebox.showerror("Error", str(e))
             
         finally:
