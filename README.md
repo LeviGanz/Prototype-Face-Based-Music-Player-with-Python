@@ -43,20 +43,20 @@ Tagged songs are stored in an emotions.json file and used to enhance the recomme
 - `path_utils.py` - Provides utility functions for handling file paths
 - `settings.py` - Handles application settings and preferences
 - `language_manager.py` - Manages multilingual support
-- `emotion_manager.py` - Handles emotion detection and analysis
+- `emotion_manager.py` - Handles emotion detection and reccomendation window
 - `camera_manager.py` - Manages camera operations and image capture
-- `recommendation_window.py` - Handles song recommendations based on emotions
+
 
 ### Build and Configuration Files
-- `app_builders.py` - Script to build the executable using PyInstaller
+- `app_builders.py` - Script to build the executable using PyInstaller | #RUN THIS ONE FIRST
 - `KaisarPlayer.spec` - PyInstaller specification file for building the executable
-- `requirements.txt` - Lists all Python package dependencies
+- `requirements.txt` - Lists all Python package dependencies | PIP -R INSTALL REQUIEREMENTS.TXT
 
-### KaisarPlayers Data Files
+### KaisarPlayers Data Files | Within Data Folder
 - `settings.json` - Contains application settings and preferences
 - `languages.json` - Contains language translation files
 - `emotions.json` - Contains emotion tag data for songs
-- `Temp_Image` - Contains temporary images captured during emotion detection
+- `Emotion_Data` - Contains Haar Cascade XML data
 - `Languages` - Contains language translation files
 - `en.json` - English translation file, inside Languages folder
 - `id.json` - Indonesian translation file, inside Languages folder
